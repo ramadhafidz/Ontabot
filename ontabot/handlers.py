@@ -133,13 +133,13 @@ async def quote_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         chat_histories[chat_id] = []
 
     quote_prompt = (
-        "Give me a random quote in MarkdownV2 format. Make sure to use \'>\' at the beginning of each quote line without spaces between \'>\' and the quote text."
-        "The quote text should also not use \". Do not include any additional text of preface, only the quote in the folowing format:\n"
+        "Give the user a random quote in MarkdownV2 format. Make sure to use \'>\' at the beginning of each quote line without spaces between \'>\' and the quote text."
+        "Do not use double quotation marks (\") in the quote. Do not include any additional text of preface like \"Here is your random quote in MarkdownV2 format:\", only the quote in the folowing format:\n"
         ">Quote text\n"
         "- Author\n\n"
         "Quote explanation\n\n"
     )
-    quote_message = await get_groq_response([{"role": "user", "content": quote_prompt}])
+    quote_message = await get_groq_response([{"role": "system", "content": quote_prompt}])
     quote_message = escape_markdown_v2(quote_message)
 
     await update.message.reply_text(quote_message, parse_mode='MarkdownV2')
@@ -153,7 +153,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     chat_id = update.message.chat_id
 
     if chat_id not in user_timezones:
-        await update.message.reply_text("Please set your time first useing /settimezone <offset_hours>")
+        await update.message.reply_text("Please set your time first using /settimezone <offset_hours>")
         return
 
     if chat_id not in chat_histories:
@@ -187,8 +187,8 @@ async def get_groq_response(history: list) -> str:
         
         chat_completion = client.chat.completions.create(
             messages=full_history,
-            model="mixtral-8x7b-32768",
-            # model="llama3-70b-8192",
+            # model="mixtral-8x7b-32768",
+            model="llama3-70b-8192",
         )
         return chat_completion.choices[0].message.content
 
